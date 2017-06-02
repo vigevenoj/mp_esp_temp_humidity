@@ -2,6 +2,15 @@ import dht
 from machine import Pin, Timer
 from umqtt.robust import MQTTClient
 import json
+import secrets
+""" secrets.py must containing the following entries
+# WIFI_SSID
+# WIFI_PASS
+# MQTT_HOST
+# MQTT_PORT
+# MQTT_USER
+# MQTT_PASS
+It is required for this program to operate """
 
 
 def do_connect():
@@ -10,7 +19,7 @@ def do_connect():
     if not sta_if.isconnected():
         print('connecting to network...')
         sta_if.active(True)
-        sta_if.connect('ROFL', 'BUTTSBUTTSBUTTS!!!')
+        sta_if.connect(secrets.WIFI_SSID, secrets.WIFI_PASS)
         while not sta_if.isconnected():
             pass
     print('network config:', sta_if.ifconfig())
@@ -24,9 +33,10 @@ class Pooper():
         self._red.on()  # this is inverted, so off
         self._blue = Pin(0, Pin.OUT)
         self._blue.on()
-        MQTT_HOST = "sharkbaitextraordinaire.com"
-        MQTT_PORT = 8885
-        self._client = MQTTClient(self._location, MQTT_HOST, MQTT_PORT)
+        self._client = MQTTClient(self._location, secrets.MQTT_HOST,
+                                  secrets.MQTT_PORT,
+                                  user=secrets.MQTT_USER,
+                                  password=secrets.MQTT_PASS)
         self._client.connect()
 
     def take_readings(self):
@@ -38,12 +48,14 @@ class Pooper():
         self._blue.off()  # blue LED on for network
         self._client.publish(
             'sensors/harold/{}/temperature'.format(self._location),
-            bytes(str(json.dumps({"temperature": temperature, "units": "C"})),
-                  'utf-8'))
+            bytes(str(json.dumps({"type": "temperature",
+                                  "value": temperature,
+                                  "units": "C"})), 'utf-8'))
         self._client.publish(
             'sensors/harold/{}/humidity'.format(self._location),
-            bytes(str(json.dumps({"humidity": humidity, "units": "%"})),
-                  'utf-8'))
+            bytes(str(json.dumps({"type": "humidity",
+                                  "value": humidity,
+                                  "units": "%"})), 'utf-8'))
         self._blue.on()  # blue LED off again
         print("Temperature: {0}".format(temperature))
         print("Humidity: {0}".format(humidity))
