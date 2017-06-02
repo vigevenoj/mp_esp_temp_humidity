@@ -4,6 +4,7 @@ from umqtt.robust import MQTTClient
 import json
 import secrets
 import utime
+import math
 """ secrets.py must containing the following entries
 # WIFI_SSID
 # WIFI_PASS
@@ -40,6 +41,8 @@ class Pooper():
                                   user=secrets.MQTT_USER,
                                   password=secrets.MQTT_PASS)
         self._client.connect()
+        self._prev_temp = -32  # This is well outside PDX temperature range
+        self._prev_humidity = -2  # Negative humidity is impossible
 
     def take_readings(self):
         self._red.off()  # toggle red LED on while taking a reading
@@ -48,18 +51,23 @@ class Pooper():
         temperature = self._sensor.temperature()
         humidity = self._sensor.humidity()
         self._red.on()  # red LED off
+        utime.sleep_ms(100)
         self._blue.off()  # blue LED on for network
         utime.sleep_ms(250)
-        self._client.publish(
-            'sensors/harold/{}/temperature'.format(self._location),
-            bytes(str(json.dumps({"type": "temperature",
-                                  "value": temperature,
-                                  "units": "C"})), 'utf-8'))
-        self._client.publish(
-            'sensors/harold/{}/humidity'.format(self._location),
-            bytes(str(json.dumps({"type": "humidity",
-                                  "value": humidity,
-                                  "units": "%"})), 'utf-8'))
+        if math.fabs(temperature - self._prev_temp) >= 0.1:
+            self._client.publish(
+                'sensors/harold/{}/temperature'.format(self._location),
+                bytes(str(json.dumps({"type": "temperature",
+                                      "value": temperature,
+                                      "units": "C"})), 'utf-8'))
+        if math.fabs(humidity - self._prev_humidity) >= 0.1:
+            self._client.publish(
+                'sensors/harold/{}/humidity'.format(self._location),
+                bytes(str(json.dumps({"type": "humidity",
+                                      "value": humidity,
+                                      "units": "%"})), 'utf-8'))
+        self._prev_humidity = humidity
+        self._prev_temp = temperature
         self._blue.on()  # blue LED off again
         print("Temperature: {0}".format(temperature))
         print("Humidity: {0}".format(humidity))
