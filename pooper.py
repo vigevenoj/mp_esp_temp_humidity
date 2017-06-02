@@ -3,6 +3,7 @@ from machine import Pin, Timer
 from umqtt.robust import MQTTClient
 import json
 import secrets
+import utime
 """ secrets.py must containing the following entries
 # WIFI_SSID
 # WIFI_PASS
@@ -32,7 +33,7 @@ class Pooper():
         self._location = secrets.DEVICE_LOCATION
         self._red = Pin(0, Pin.OUT)
         self._red.on()  # this is inverted, so off
-        self._blue = Pin(0, Pin.OUT)
+        self._blue = Pin(2, Pin.OUT)
         self._blue.on()
         self._client = MQTTClient(self._location, secrets.MQTT_HOST,
                                   secrets.MQTT_PORT,
@@ -42,11 +43,13 @@ class Pooper():
 
     def take_readings(self):
         self._red.off()  # toggle red LED on while taking a reading
+        utime.sleep_ms(250)
         self._sensor.measure()
         temperature = self._sensor.temperature()
         humidity = self._sensor.humidity()
         self._red.on()  # red LED off
         self._blue.off()  # blue LED on for network
+        utime.sleep_ms(250)
         self._client.publish(
             'sensors/harold/{}/temperature'.format(self._location),
             bytes(str(json.dumps({"type": "temperature",
