@@ -10,6 +10,7 @@ import secrets
 # MQTT_PORT
 # MQTT_USER
 # MQTT_PASS
+# DEVICE_LOCATION
 It is required for this program to operate """
 
 
@@ -28,7 +29,7 @@ def do_connect():
 class Pooper():
     def __init__(self):
         self._sensor = dht.DHT22(Pin(12))
-        self._location = "downstairs"
+        self._location = secrets.DEVICE_LOCATION
         self._red = Pin(0, Pin.OUT)
         self._red.on()  # this is inverted, so off
         self._blue = Pin(0, Pin.OUT)
