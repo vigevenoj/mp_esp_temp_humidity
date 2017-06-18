@@ -59,13 +59,13 @@ class Pooper():
                 'sensors/harold/{}/temperature'.format(self._location),
                 bytes(str(json.dumps({"type": "temperature",
                                       "value": temperature,
-                                      "units": "C"})), 'utf-8'))
+                                      "units": "C"})), 'utf-8'), retain=True)
         if math.fabs(humidity - self._prev_humidity) >= 0.1:
             self._client.publish(
                 'sensors/harold/{}/humidity'.format(self._location),
                 bytes(str(json.dumps({"type": "humidity",
                                       "value": humidity,
-                                      "units": "%"})), 'utf-8'))
+                                      "units": "%"})), 'utf-8'), retain=True)
         self._prev_humidity = humidity
         self._prev_temp = temperature
         self._blue.on()  # blue LED off again
