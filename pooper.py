@@ -40,6 +40,10 @@ class Pooper():
                                   secrets.MQTT_PORT,
                                   user=secrets.MQTT_USER,
                                   password=secrets.MQTT_PASS)
+        self._client.set_last_will(
+            "/lwt/sensors/harold/{0}".format(self._location),
+            "sensor at harold {0} is offline".format(self._location)
+        )
         self._client.connect()
         self._prev_temp = -32  # This is well outside PDX temperature range
         self._prev_humidity = -2  # Negative humidity is impossible
@@ -79,4 +83,4 @@ if __name__ == '__main__':
     pooper.take_readings()
     timer = Timer(-1)
     timer.init(period=30000, mode=Timer.PERIODIC,
-               callback=lambda t:pooper.take_readings())
+               callback=lambda t: pooper.take_readings())
