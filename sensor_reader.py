@@ -28,7 +28,7 @@ def do_connect():
     print('network config:', sta_if.ifconfig())
 
 
-class Pooper():
+class SensorReader():
     def __init__(self):
         self._sensor = dht.DHT22(Pin(12))
         self._location = secrets.DEVICE_LOCATION
@@ -79,8 +79,8 @@ class Pooper():
 
 if __name__ == '__main__':
     do_connect()
-    pooper = Pooper()
-    pooper.take_readings()
+    sensor_reader = SensorReader()
+    sensor_reader.take_readings()
     timer = Timer(-1)
     timer.init(period=30000, mode=Timer.PERIODIC,
-               callback=lambda t: pooper.take_readings())
+               callback=lambda t: sensor_reader.take_readings())

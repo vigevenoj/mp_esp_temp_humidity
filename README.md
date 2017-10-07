@@ -5,7 +5,7 @@ Clone the repository
 Create a virtualenv and activate it  
 pip install -r requirements.txt  
 Upload secrets.py to hardware with adafruit-ampy  
-Upload pooper.py to hardware as main.py with adafruit-ampy  
+Upload sensor\_reader.py to hardware as main.py with adafruit-ampy  
 
 
 ## Flashing hardware
